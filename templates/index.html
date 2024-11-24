@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Quote System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #quote {
+            font-size: 1.5rem;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            max-width: 600px;
+        }
+        button {
+            font-size: 1rem;
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        select {
+            font-size: 1rem;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Adaptive Quote Suggestion System</h1>
+    <div>
+        <label for="genre">Select Genre:</label>
+        <select id="genre" onchange="fetchQuote()">
+            <option value="">All</option>
+            <option value="motivational">Motivational</option>
+            <option value="humorous">Humorous</option>
+            <option value="philosophical">Philosophical</option>
+        </select>
+    </div>
+    <div id="quote">
+        <p>Loading...</p>
+    </div>
+    <button onclick="sendFeedback('like')">Like</button>
+    <button onclick="sendFeedback('dislike')">Dislike</button>
+    <script>
+        let userId = "user_123"; // Example user ID
+
+        // Fetch initial quote
+        async function fetchQuote() {
+            const genre = document.getElementById("genre").value;
+            const response = await fetch('/recommend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: userId, genre: genre })
+            });
+            const data = await response.json();
+            document.getElementById('quote').innerHTML = `<p>${data.text}</p>`;
+            window.currentQuoteId = data.id;
+        }
+
+        // Send feedback
+        async function sendFeedback(feedback) {
+            await fetch('/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: userId,
+                    quoteId: window.currentQuoteId,
+                    feedback: feedback
+                })
+            });
+            fetchQuote(); // Fetch next quote after feedback
+        }
+
+        fetchQuote();
+    </script>
+</body>
+</html>
